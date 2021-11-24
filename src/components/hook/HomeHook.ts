@@ -51,10 +51,6 @@ export class HomeHook extends Hook<HomeState> {
 				L.marker([ e.latlng.lat, e.latlng.lng ]).addTo(this.map);
 			});
 			this.addRandomMarker();
-			// L.marker([ 1.3521, 103.8198 ])
-			// 	.addTo(this.map)
-			// 	.bindPopup('A pretty CSS3 popup.<br> Easily customizable.')
-			// 	.openPopup();
 		}
 	}
 
