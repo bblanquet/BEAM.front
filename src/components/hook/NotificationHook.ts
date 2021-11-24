@@ -22,6 +22,8 @@ export class NotificationHook extends Hook<InfoState> {
 
 	protected stateChanged(): void {}
 
+	public didMount(): void {}
+
 	private handleNotification(src: any, notification: InfoState): void {
 		this.update((e) => {
 			e.kind = notification.kind;

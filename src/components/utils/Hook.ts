@@ -12,4 +12,6 @@ export abstract class Hook<T> {
 	protected abstract stateChanged(): void;
 
 	public abstract unmount(): void;
+
+	public abstract didMount(): void;
 }

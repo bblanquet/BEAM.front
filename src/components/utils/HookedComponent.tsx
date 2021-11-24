@@ -18,6 +18,10 @@ export abstract class HookedComponent<T1, T2 extends Hook<T3>, T3> extends Compo
 		return this._render();
 	}
 
+	componentDidMount() {
+		this.hook.didMount();
+	}
+
 	componentWillUnmount() {
 		this.hook.unmount();
 	}

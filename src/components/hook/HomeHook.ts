@@ -8,6 +8,7 @@ import { InfoState } from '../model/InfoState';
 import { LogKind } from '../../tools/logger/LogKind';
 import { RecordingState } from '../model/RecordingState';
 import Worker from 'worker-loader!./to64.worker';
+import * as L from 'leaflet';
 
 export class HomeHook extends Hook<HomeState> {
 	private apiSvc: IApiService;
@@ -16,11 +17,14 @@ export class HomeHook extends Hook<HomeState> {
 	private socketAddress: string = '{{socket}}';
 	private img: HTMLImageElement = new Image();
 	private worker;
+	private map: L.Map;
+	private markers: L.Marker[] = [];
 
 	constructor(d: [HomeState, StateUpdater<HomeState>]) {
 		super(d[0], d[1]);
 		this.apiSvc = Singletons.Load<IApiService>(SingletonKey.api);
 		this.notificationSvc = Singletons.Load<INotificationService>(SingletonKey.notification);
+		this.status('Robot/status');
 		this.worker = new Worker();
 		this.worker.onmessage = (ev: MessageEvent) => {
 			const imgData = URL.createObjectURL(new Blob([ ev.data as Blob ], { type: 'image/jpg' }));
@@ -35,6 +39,33 @@ export class HomeHook extends Hook<HomeState> {
 
 	static defaultState(): HomeState {
 		return new HomeState();
+	}
+
+	public didMount(): void {
+		if (this.map === undefined) {
+			this.map = L.map('map').setView([ 1.3521, 103.8198 ], 13);
+			L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+				attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+			}).addTo(this.map);
+			this.map.on('click', (e: any) => {
+				L.marker([ e.latlng.lat, e.latlng.lng ]).addTo(this.map);
+			});
+			this.addRandomMarker();
+			// L.marker([ 1.3521, 103.8198 ])
+			// 	.addTo(this.map)
+			// 	.bindPopup('A pretty CSS3 popup.<br> Easily customizable.')
+			// 	.openPopup();
+		}
+	}
+
+	private addRandomMarker() {
+		let i = 0;
+		while (i < 10) {
+			const lat = Math.random() * 0.1 + 1.3521;
+			const lng = Math.random() * 0.1 + 103.8198;
+			this.markers.push(L.marker([ lat, lng ]).addTo(this.map));
+			i++;
+		}
 	}
 
 	protected stateChanged(): void {}
