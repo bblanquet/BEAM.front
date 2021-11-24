@@ -1,0 +1,20 @@
+{
+	"root": "/robot/front",
+	"keys": [
+		{
+			"search": "{{server}}",
+			"replace": "https://kimchistudio.tech/robot/back",
+			"flags": "g"
+		},
+		{
+			"search": "{{socket}}",
+			"replace": "wss://kimchistudio.tech/robot/back/robot/stream",
+			"flags": "g"
+		},
+		{
+			"search": "{{asset_path}}",
+			"replace": "/robot/front/",
+			"flags": "g"
+		}
+	]
+}

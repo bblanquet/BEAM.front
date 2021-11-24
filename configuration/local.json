@@ -1,0 +1,20 @@
+{
+	"root": "/",
+	"keys": [
+		{
+			"search": "{{server}}",
+			"replace": "http://172.30.1.30:49154",
+			"flags": "g"
+		},
+		{
+			"search": "{{socket}}",
+			"replace": "ws://172.30.1.30:49154/robot/stream",
+			"flags": "g"
+		},
+		{
+			"search": "{{asset_path}}",
+			"replace": "/",
+			"flags": "g"
+		}
+	]
+}
