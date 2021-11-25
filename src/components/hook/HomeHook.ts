@@ -6,75 +6,104 @@ import { IApiService } from '../../services/IApiService';
 import { INotificationService } from '../../services/INotificationService';
 import { InfoState } from '../model/InfoState';
 import { LogKind } from '../../tools/logger/LogKind';
-import { RecordingState } from '../model/RecordingState';
-import Worker from 'worker-loader!./to64.worker';
 import * as L from 'leaflet';
+import { Scooter } from '../model/Scooter';
+import { NearScooterPayload } from '../model/NearScooterPayload';
+import { NearScooter } from '../model/NearScooter';
 
 export class HomeHook extends Hook<HomeState> {
 	private apiSvc: IApiService;
 	private notificationSvc: INotificationService;
-	private socket: WebSocket;
-	private socketAddress: string = '{{socket}}';
-	private img: HTMLImageElement = new Image();
-	private worker;
 	private map: L.Map;
 	private markers: L.Marker[] = [];
+	private circle: L.Circle;
+	private innerCircle: L.Circle;
+	private animateSidebar: (e: boolean) => void;
 
-	constructor(d: [HomeState, StateUpdater<HomeState>]) {
+	constructor(d: [HomeState, StateUpdater<HomeState>], animateSidebar: (e: boolean) => void) {
 		super(d[0], d[1]);
+		this.animateSidebar = animateSidebar;
 		this.apiSvc = Singletons.Load<IApiService>(SingletonKey.api);
 		this.notificationSvc = Singletons.Load<INotificationService>(SingletonKey.notification);
-		this.status('Robot/status');
-		this.worker = new Worker();
-		this.worker.onmessage = (ev: MessageEvent) => {
-			const imgData = URL.createObjectURL(new Blob([ ev.data as Blob ], { type: 'image/jpg' }));
-			this.img.src = imgData;
-			this.img.onload = () => {
-				this.img.decode().then(() => {
-					document.body.style.backgroundImage = `url(${imgData})`;
-				});
-			};
-		};
-	}
-
-	static defaultState(): HomeState {
-		return new HomeState();
+		this.all();
 	}
 
 	public didMount(): void {
 		if (this.map === undefined) {
-			this.map = L.map('map').setView([ 1.3521, 103.8198 ], 13);
-			L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
-				attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-			}).addTo(this.map);
+			this.map = L.map('map', { zoomControl: false }).setView([ 1.3521, 103.8198 ], 13);
+			L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png').addTo(this.map);
 			this.map.on('click', (e: any) => {
-				L.marker([ e.latlng.lat, e.latlng.lng ]).addTo(this.map);
+				if (this.circle) {
+					this.circle.remove();
+					this.innerCircle.remove();
+				}
+
+				if (this.innerCircle) {
+					this.innerCircle.remove();
+				}
+
+				this.circle = L.circle([ e.latlng.lat, e.latlng.lng ], {
+					color: 'purple',
+					fillColor: '#625EAA',
+					fillOpacity: 0.5,
+					radius: this.state.radius
+				}).addTo(this.map);
+
+				this.innerCircle = L.circle([ e.latlng.lat, e.latlng.lng ], {
+					color: 'white',
+					fillColor: '#fff',
+					fillOpacity: 0.5,
+					radius: 5
+				}).addTo(this.map);
+
+				this.close(e.latlng.lat, e.latlng.lng, this.state.radius);
 			});
-			this.addRandomMarker();
 		}
 	}
-
-	private addRandomMarker() {
-		let i = 0;
-		while (i < 10) {
-			const lat = Math.random() * 0.1 + 1.3521;
-			const lng = Math.random() * 0.1 + 103.8198;
-			this.markers.push(L.marker([ lat, lng ]).addTo(this.map));
-			i++;
-		}
-	}
-
-	protected stateChanged(): void {}
 
 	public unmount(): void {}
 
-	private status(route: string): void {
-		this.apiSvc.get<null, { isOnline: boolean }>(
-			route,
+	protected stateChanged(): void {}
+
+	private close(latitude: number, longitude: number, radius: number): void {
+		this.apiSvc.get<NearScooterPayload, Array<NearScooter>>(
+			'Scooter/close',
+			{ latitude, longitude, radius },
+			(r) => {
+				this.update((s) => {
+					s.selected = r;
+				});
+			},
+			(e) => {
+				this.notificationSvc.onNotification.Invoke(
+					this,
+					new InfoState(LogKind.error, `${e.name} - ${e.description}`)
+				);
+			}
+		);
+	}
+
+	private all(): void {
+		this.apiSvc.get<null, Array<Scooter>>(
+			'Scooter/all',
 			null,
 			(r) => {
-				this.update((e) => {
-					e.isOnline = r.isOnline;
+				if (0 < this.markers.length) {
+					this.markers.forEach((m) => {
+						m.remove();
+					});
+					this.markers = [];
+				}
+
+				r.forEach((scooter) => {
+					this.markers.push(
+						L.marker([ scooter.latitude, scooter.longitude ])
+							.bindPopup(`<b>Hello!</b><br>I am #${scooter.id}.`)
+							.addTo(this.map)
+					);
+				});
+				this.update((s) => {
+					s.all = r;
 				});
 			},
 			(e) => {
@@ -86,81 +115,23 @@ export class HomeHook extends Hook<HomeState> {
 		);
 	}
 
-	private orderToApi(payload: { message: string }): void {
-		this.apiSvc.get<{ message: string }, {}>(
-			'Robot/order',
-			payload,
-			(r) => {},
-			(e) => {
-				this.notificationSvc.onNotification.Invoke(
-					this,
-					new InfoState(LogKind.error, `${e.name} - ${e.description}`)
-				);
-			}
-		);
+	setSidebar() {
+		const value = !this.state.isSidebarVisible;
+		this.update((s) => {
+			s.isSidebarVisible = value;
+		});
+		this.animateSidebar(value);
 	}
 
-	public stream(): void {
-		if (this.state.recordingState === RecordingState.OFF) {
-			this.createSocket();
-		} else if (this.state.recordingState === RecordingState.ON) {
-			if (this.socket) {
-				this.socket.close();
-			}
-		}
+	setRadius(value: any): void {
+		this.update((s) => {
+			s.radius = value;
+		});
 	}
 
-	private createSocket(): void {
-		if (this.socket === undefined) {
-			this.update((e) => {
-				e.recordingState = RecordingState.LOADING;
-			});
-			this.socket = new WebSocket(this.socketAddress);
-			this.socket.onopen = (ev: MessageEvent) => {
-				this.update((e) => {
-					e.recordingState = RecordingState.ON;
-				});
-				this.socket.onmessage = (ev: MessageEvent) => {
-					this.worker.postMessage(ev.data);
-				};
-			};
-
-			this.socket.onerror = (ev: MessageEvent) => {
-				this.socket = undefined;
-				this.update((e) => {
-					e.recordingState = RecordingState.OFF;
-				});
-			};
-
-			this.socket.onclose = (ev: CloseEvent) => {
-				this.socket = undefined;
-				this.update((e) => {
-					e.recordingState = RecordingState.OFF;
-				});
-			};
-		}
-	}
-
-	public capture(): void {
-		this.apiSvc.get<null, ArrayBuffer>(
-			'Robot/capture',
-			null,
-			(r) => {
-				this.update((e) => {
-					e.currentImage = URL.createObjectURL(new Blob([ r ], { type: 'image/jpg' }));
-				});
-			},
-			(e) => {
-				this.notificationSvc.onNotification.Invoke(
-					this,
-					new InfoState(LogKind.error, `${e.name} - ${e.description}`)
-				);
-			},
-			{ responseType: 'arraybuffer' }
-		);
-	}
-
-	order(ms: string) {
-		this.orderToApi({ message: ms });
+	setScooter(value: any): void {
+		this.update((s) => {
+			s.scooterCount = value;
+		});
 	}
 }
