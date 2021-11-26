@@ -28,7 +28,7 @@ export default class HomeScreen extends HookedComponent<{}, HomeHook, HomeState>
 					<div class="btn-sidebar" ref={(e) => (this.sidebarBtn = e)}>
 						<button
 							type="button"
-							class="btn btn-dark"
+							class="btn btn-light"
 							onClick={(e) => {
 								this.hook.setSidebar();
 							}}
@@ -61,14 +61,14 @@ export default class HomeScreen extends HookedComponent<{}, HomeHook, HomeState>
 									id="formGroupExampleInput"
 									placeholder="5"
 									value={this.hook.state.scooterCount}
-									onInput={(e: any) => this.hook.setRadius(e.target.value)}
+									onInput={(e: any) => this.hook.setScooter(e.target.value)}
 								/>
 							</div>
 						</form>
 						<ul class="list-group" style="overflow-y:auto;height:50vh">
 							{this.hook.state.selected.map((item) => (
 								<li class="list-group-item d-flex justify-content-between align-items-center">
-									<span class="badge badge-secondary sm-m">{`#${item.scooter.id}`}</span>
+									<span class="badge badge-dark sm-m">{`#${item.scooter.id}`}</span>
 									<span class="purple-text">{toReadableNumber(item.distance)}m</span>
 								</li>
 							))}

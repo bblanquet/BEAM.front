@@ -56,7 +56,7 @@ export class HomeHook extends Hook<HomeState> {
 					radius: 5
 				}).addTo(this.map);
 
-				this.close(e.latlng.lat, e.latlng.lng, this.state.radius);
+				this.close(e.latlng.lat, e.latlng.lng);
 			});
 		}
 	}
@@ -65,10 +65,10 @@ export class HomeHook extends Hook<HomeState> {
 
 	protected stateChanged(): void {}
 
-	private close(latitude: number, longitude: number, radius: number): void {
+	private close(latitude: number, longitude: number): void {
 		this.apiSvc.get<NearScooterPayload, Array<NearScooter>>(
-			'Scooter/close',
-			{ latitude, longitude, radius },
+			'Scooter/near',
+			{ latitude, longitude, radius: this.state.radius, scooterCount: this.state.scooterCount },
 			(r) => {
 				this.update((s) => {
 					s.selected = r;

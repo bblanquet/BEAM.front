@@ -3,12 +3,7 @@
 	"keys": [
 		{
 			"search": "{{server}}",
-			"replace": "https://localhost:49156",
-			"flags": "g"
-		},
-		{
-			"search": "{{asset_path}}",
-			"replace": "/",
+			"replace": "https://localhost:49153",
 			"flags": "g"
 		}
 	]

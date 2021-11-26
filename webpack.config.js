@@ -43,8 +43,7 @@ module.exports = (env) => {
 			new CleanWebpackPlugin(),
 			new HtmlWebpackPlugin({
 				template: './src/index.html'
-			}),
-			new CopyPlugin([ { from: './src/asset', to: '' } ])
+			})
 		]
 	};
 };
