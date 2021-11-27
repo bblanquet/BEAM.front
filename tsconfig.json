@@ -9,6 +9,6 @@
       "allowJs": true,
       "sourceMap": true,
       "moduleResolution": "node",
-      "typeRoots": ["./node_modules/@types", "./src/typings"]
+      "typeRoots": ["./node_modules/@types"]
     }
   }

@@ -1,9 +1,9 @@
 {
-	"root": "/robot/front",
+	"root": "/beam_front",
 	"keys": [
 		{
 			"search": "{{server}}",
-			"replace": "https://kimchistudio.tech/robot/back",
+			"replace": "https://kimchistudio.tech/beam_back",
 			"flags": "g"
 		}
 	]

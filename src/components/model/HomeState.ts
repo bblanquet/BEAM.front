@@ -1,9 +1,10 @@
 import { NearScooter } from './NearScooter';
+import { Point } from './Point';
 import { Scooter } from './Scooter';
 
 export class HomeState {
-	isSidebarVisible: boolean = false;
-	radius: number = 10000;
+	point: Point;
+	radius: number = 700;
 	scooterCount: number = 5;
 	all: Array<Scooter> = [];
 	selected: Array<NearScooter> = [];

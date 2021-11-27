@@ -6,8 +6,9 @@ import '@fortawesome/fontawesome-free/js/fontawesome';
 import '@fortawesome/fontawesome-free/js/solid';
 import '@fortawesome/fontawesome-free/js/regular';
 import '@fortawesome/fontawesome-free/js/brands';
-import './common.css';
-import './animation.css';
+import './styles/common.css';
+import './styles/animation.css';
+import './styles/slider.css';
 import Router from 'preact-router';
 import { SingletonContainer } from './tools/singleton/SingletonContainer';
 
