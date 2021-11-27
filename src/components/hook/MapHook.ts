@@ -1,34 +1,70 @@
-import { HomeState } from '../model/HomeState';
 import { Hook } from '../utils/Hook';
 import { StateUpdater } from 'preact/hooks';
 import { SingletonKey, Singletons } from '../../tools/singleton/Singletons';
 import { IApiService } from '../../services/IApiService';
-import { INotificationService } from '../../services/INotificationService';
-import { InfoState } from '../model/InfoState';
+import { NotificationContent } from '../model/InfoState';
 import { LogKind } from '../../tools/logger/LogKind';
 import * as L from 'leaflet';
 import { Scooter } from '../model/Scooter';
-import { NearScooterPayload } from '../model/NearScooterPayload';
-import { NearScooter } from '../model/NearScooter';
 import { Point } from '../model/Point';
 import { Dictionary } from '../../tools/collections/Dictionary';
+import { MapState } from '../model/MapState';
+import { IStore } from '../../tools/store/IStore';
+import { isEqual } from 'lodash';
 
 const SINGAPORE_LATITUDE = 1.3521;
 const SINGAPORE_LONGITUDE = 103.8198;
 
-export class HomeHook extends Hook<HomeState> {
+export class MapHook extends Hook<{}, MapState> {
 	private apiSvc: IApiService;
-	private notificationSvc: INotificationService;
+	private notificationStore: IStore<NotificationContent>;
+	private pointStore: IStore<Point>;
+	private radiusStore: IStore<number>;
+	private scooteridStore: IStore<number>;
+
 	private map: L.Map;
 	private markers: Dictionary<L.Marker> = new Dictionary<L.Marker>();
 	private circle: L.Circle;
 	private innerCircle: L.Circle;
-	private timeout: NodeJS.Timeout;
 
-	constructor(d: [HomeState, StateUpdater<HomeState>]) {
+	constructor(d: [MapState, StateUpdater<MapState>]) {
 		super(d[0], d[1]);
 		this.apiSvc = Singletons.Load<IApiService>(SingletonKey.api);
-		this.notificationSvc = Singletons.Load<INotificationService>(SingletonKey.notification);
+		this.pointStore = Singletons.Load<IStore<Point>>(SingletonKey.location);
+		this.radiusStore = Singletons.Load<IStore<number>>(SingletonKey.radius);
+		this.scooteridStore = Singletons.Load<IStore<number>>(SingletonKey.scooterId);
+		this.notificationStore = Singletons.Load<IStore<NotificationContent>>(SingletonKey.notification);
+
+		this.update((s) => {
+			s.id = this.scooteridStore.get();
+			s.radius = this.radiusStore.get();
+			s.point = this.pointStore.get();
+		});
+
+		this.pointStore.onChange.on((src: any, point: Point) => {
+			if (!isEqual(point, this.state.point)) {
+				this.update((s) => {
+					s.point = point;
+				});
+				this.updateCircle();
+			}
+		});
+		this.radiusStore.onChange.on((src: any, point: number) => {
+			if (point !== this.state.radius) {
+				this.update((s) => {
+					s.radius = point;
+				});
+				this.updateCircle();
+			}
+		});
+		this.scooteridStore.onChange.on((src: any, id: number) => {
+			if (id !== this.state.id) {
+				this.update((s) => {
+					s.id = id;
+				});
+				this.openPopup(id);
+			}
+		});
 	}
 
 	public didMount(): void {
@@ -36,19 +72,14 @@ export class HomeHook extends Hook<HomeState> {
 			this.map = L.map('map', { zoomControl: false }).setView([ SINGAPORE_LATITUDE, SINGAPORE_LONGITUDE ], 13);
 			L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png').addTo(this.map);
 			this.map.on('click', (e: any) => {
-				this.update((s) => {
-					s.point = new Point(e.latlng.lat, e.latlng.lng);
-				});
-				this.updateCircle();
-				this.tryToGetNear();
+				this.pointStore.set(new Point(e.latlng.lat, e.latlng.lng));
 			});
 			this.all();
 		}
 	}
 
-	public setView(id: number) {
-		const scooter = this.state.selected.find((s) => s.scooter.id === id).scooter;
-		if (scooter) {
+	public openPopup(id: number) {
+		if (this.markers.Exist(id.toString())) {
 			this.markers.Get(id.toString()).openPopup();
 		}
 	}
@@ -80,35 +111,6 @@ export class HomeHook extends Hook<HomeState> {
 		}
 	}
 
-	public unmount(): void {}
-
-	protected stateChanged(): void {}
-
-	private getNear(): void {
-		if (this.state.point !== undefined) {
-			this.apiSvc.get<NearScooterPayload, Array<NearScooter>>(
-				'Scooter/near',
-				{
-					latitude: this.state.point.latitude,
-					longitude: this.state.point.longitude,
-					radius: this.state.radius,
-					scooterCount: this.state.scooterCount
-				},
-				(r) => {
-					this.update((s) => {
-						s.selected = r;
-					});
-				},
-				(e) => {
-					this.notificationSvc.onNotification.Invoke(
-						this,
-						new InfoState(LogKind.error, `${e.name} - ${e.description}`)
-					);
-				}
-			);
-		}
-	}
-
 	private all(): void {
 		this.apiSvc.get<null, Array<Scooter>>(
 			'Scooter/all',
@@ -133,36 +135,8 @@ export class HomeHook extends Hook<HomeState> {
 				});
 			},
 			(e) => {
-				this.notificationSvc.onNotification.Invoke(
-					this,
-					new InfoState(LogKind.error, `${e.name} - ${e.description}`)
-				);
+				this.notificationStore.set(new NotificationContent(LogKind.error, `${e.name} - ${e.description}`));
 			}
 		);
-	}
-
-	setRadius(value: any): void {
-		this.update((s) => {
-			s.radius = value;
-		});
-		this.updateCircle();
-		this.tryToGetNear();
-	}
-
-	setScooter(value: any): void {
-		this.update((s) => {
-			s.scooterCount = value;
-		});
-		this.tryToGetNear();
-	}
-
-	private tryToGetNear() {
-		if (this.timeout) {
-			clearTimeout(this.timeout);
-			this.timeout = null;
-		}
-		this.timeout = setTimeout(() => {
-			this.getNear();
-		}, 500);
 	}
 }

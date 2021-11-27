@@ -1,30 +1,22 @@
-import { InfoState } from '../model/InfoState';
+import { NotificationContent } from '../model/InfoState';
 import { LogKind } from '../../tools/logger/LogKind';
 import { StaticLogger } from '../../tools/logger/StaticLogger';
 import { StateUpdater } from 'preact/hooks';
 import { Hook } from '../utils/Hook';
-import { INotificationService } from '../../services/INotificationService';
 import { SingletonKey, Singletons } from '../../tools/singleton/Singletons';
+import { IStore } from '../../tools/store/IStore';
 
-export class NotificationHook extends Hook<InfoState> {
-	private notificationSvc: INotificationService;
+export class NotificationHook extends Hook<{}, NotificationContent> {
+	private notificationSvc: IStore<NotificationContent>;
 	private _timeout: NodeJS.Timeout;
 
-	constructor(d: [InfoState, StateUpdater<InfoState>], private animate: () => void) {
+	constructor(d: [NotificationContent, StateUpdater<NotificationContent>], private animate: () => void) {
 		super(d[0], d[1]);
-		this.notificationSvc = Singletons.Load<INotificationService>(SingletonKey.notification);
-		this.notificationSvc.onNotification.On(this.handleNotification.bind(this));
+		this.notificationSvc = Singletons.Load<IStore<NotificationContent>>(SingletonKey.notification);
+		this.notificationSvc.onChange.on(this.handleNotification.bind(this));
 	}
 
-	public static defaultState(): InfoState {
-		return new InfoState(LogKind.error, '');
-	}
-
-	protected stateChanged(): void {}
-
-	public didMount(): void {}
-
-	private handleNotification(src: any, notification: InfoState): void {
+	private handleNotification(src: any, notification: NotificationContent): void {
 		this.update((e) => {
 			e.kind = notification.kind;
 			e.message = notification.message;

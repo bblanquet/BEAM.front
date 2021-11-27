@@ -1,17 +1,21 @@
 import { StateUpdater } from 'preact/hooks';
 
-export abstract class Hook<T> {
-	public constructor(public state: T, protected setState: StateUpdater<T>) {}
+export abstract class Hook<TProps, TModel> {
+	protected props: TProps;
+	public constructor(public state: TModel, protected setState: StateUpdater<TModel>) {}
 
-	protected update(setter: (state: T) => void): void {
+	protected update(setter: (state: TModel) => void): void {
 		setter(this.state);
 		this.setState({ ...this.state });
-		this.stateChanged();
 	}
 
-	protected abstract stateChanged(): void;
+	public unmount(): void {}
 
-	public abstract unmount(): void;
+	public didMount(props: TProps): void {
+		this.props = props;
+	}
 
-	public abstract didMount(): void;
+	public didUpdate(prevProps: TProps, props: TProps) {
+		this.props = props;
+	}
 }

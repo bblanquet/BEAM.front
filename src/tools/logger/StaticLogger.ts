@@ -57,7 +57,7 @@ export class StaticLogger {
 				`color:${this.Colors.Get(LogKind[logKind])};font-weight:${this._style.Get(LogKind[logKind])};`
 			);
 		}
-		this.OnMessage.Invoke(this, message);
+		this.OnMessage.invoke(this, message);
 	}
 
 	private static CallerName(): string {

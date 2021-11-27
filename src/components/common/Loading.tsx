@@ -8,10 +8,12 @@ export default class Loading extends Component<{ value: RequestState }, {}> {
 		return (
 			<div>
 				<Visible isVisible={this.props.value === RequestState.LOADING}>
-					<span class="sm-m">
-						<Icon value="fas fa-spinner fa-spin" />
-					</span>
-					Loading...
+					<ul class="list-group">
+						<li class="list-group-item list-group-item-light">
+							<Icon value="fas fa-spinner fa-spin" />
+							<span style="margin:5px">Loading...</span>
+						</li>
+					</ul>
 				</Visible>
 				<Visible isVisible={this.props.value === RequestState.ERROR}>
 					<span class="sm-m">

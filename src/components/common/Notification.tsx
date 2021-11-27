@@ -1,16 +1,17 @@
 import { h, Component } from 'preact';
-import { InfoState } from '../model/InfoState';
+import { NotificationContent } from '../model/InfoState';
 import { useState } from 'preact/hooks';
-import { HookedComponent } from '../utils/HookedComponent';
+import { HookableComponent } from '../utils/HookableComponent';
 import { NotificationHook } from '../hook/NotificationHook';
 import Visible from './Visible';
 import Icon from './Icon';
+import { LogKind } from '../../tools/logger/LogKind';
 
-export default class Notification extends HookedComponent<{}, NotificationHook, InfoState> {
+export default class Notification extends HookableComponent<{}, NotificationHook, NotificationContent> {
 	private _notificationDiv: HTMLElement;
 
 	public getDefaultHook(): NotificationHook {
-		return new NotificationHook(useState(NotificationHook.defaultState()), this.Animate.bind(this));
+		return new NotificationHook(useState(new NotificationContent(LogKind.error, '')), this.Animate.bind(this));
 	}
 
 	private Animate() {

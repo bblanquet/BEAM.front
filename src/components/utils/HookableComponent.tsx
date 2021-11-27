@@ -1,12 +1,12 @@
 import { Hook } from './Hook';
 import { Component, JSX } from 'preact';
 
-export abstract class HookedComponent<T1, T2 extends Hook<T3>, T3> extends Component<T1> {
+export abstract class HookableComponent<TProps, THook extends Hook<TProps, TModel>, TModel> extends Component<TProps> {
 	private _render: () => JSX.Element = this.init.bind(this);
-	protected hook: T2;
+	protected hook: THook;
 
 	public abstract rendering(): JSX.Element;
-	public abstract getDefaultHook(): T2;
+	public abstract getDefaultHook(): THook;
 
 	private init(): JSX.Element {
 		this.hook = this.getDefaultHook();
@@ -19,7 +19,11 @@ export abstract class HookedComponent<T1, T2 extends Hook<T3>, T3> extends Compo
 	}
 
 	componentDidMount() {
-		this.hook.didMount();
+		this.hook.didMount(this.props);
+	}
+
+	componentDidUpdate(prevProps: TProps) {
+		this.hook.didUpdate(prevProps, this.props);
 	}
 
 	componentWillUnmount() {

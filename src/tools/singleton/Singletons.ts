@@ -18,7 +18,10 @@ export class Singletons {
 }
 
 export enum SingletonKey {
-	user,
 	api,
-	notification
+	notification,
+	radius,
+	scooterId,
+	location,
+	scooterCount
 }
