@@ -1,23 +1,23 @@
-import { Hook } from '../utils/Hook';
-import { StateUpdater } from 'preact/hooks';
-import { SingletonKey, Singletons } from '../../tools/singleton/Singletons';
-import { IApiService } from '../../services/IApiService';
-import { NotificationContent } from '../model/InfoState';
-import { LogKind } from '../../tools/logger/LogKind';
-import * as L from 'leaflet';
-import { Scooter } from '../model/Scooter';
-import { Point } from '../model/Point';
-import { Dictionary } from '../../tools/collections/Dictionary';
-import { MapState } from '../model/MapState';
-import { IStore } from '../../tools/store/IStore';
+import L from 'leaflet';
 import { isEqual } from 'lodash';
+import { StateUpdater } from 'preact/hooks';
+import { IApiService } from '../../../services/IApiService';
+import { Dictionary } from '../../../tools/collections/Dictionary';
+import { LogKind } from '../../../tools/logger/LogKind';
+import { Singletons, SingletonKey } from '../../../tools/singleton/Singletons';
+import { IStore } from '../../../tools/store/IStore';
+import { NotificationState } from '../notification/NotificationState';
+import { MapState } from './MapState';
+import { Point } from '../../model/Point';
+import { Scooter } from '../../model/Scooter';
+import { Hook } from '../../framework/Hook';
 
 const SINGAPORE_LATITUDE = 1.3521;
 const SINGAPORE_LONGITUDE = 103.8198;
 
 export class MapHook extends Hook<{}, MapState> {
 	private apiSvc: IApiService;
-	private notificationStore: IStore<NotificationContent>;
+	private notificationStore: IStore<NotificationState>;
 	private pointStore: IStore<Point>;
 	private radiusStore: IStore<number>;
 	private scooteridStore: IStore<number>;
@@ -33,7 +33,7 @@ export class MapHook extends Hook<{}, MapState> {
 		this.pointStore = Singletons.Load<IStore<Point>>(SingletonKey.location);
 		this.radiusStore = Singletons.Load<IStore<number>>(SingletonKey.radius);
 		this.scooteridStore = Singletons.Load<IStore<number>>(SingletonKey.scooterId);
-		this.notificationStore = Singletons.Load<IStore<NotificationContent>>(SingletonKey.notification);
+		this.notificationStore = Singletons.Load<IStore<NotificationState>>(SingletonKey.notification);
 
 		this.update((s) => {
 			s.id = this.scooteridStore.get();
@@ -135,7 +135,7 @@ export class MapHook extends Hook<{}, MapState> {
 				});
 			},
 			(e) => {
-				this.notificationStore.set(new NotificationContent(LogKind.error, `${e.name} - ${e.description}`));
+				this.notificationStore.set(new NotificationState(LogKind.error, `${e.name} - ${e.description}`));
 			}
 		);
 	}

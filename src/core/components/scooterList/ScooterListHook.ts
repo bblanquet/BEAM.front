@@ -1,21 +1,21 @@
 import { isEqual } from 'lodash';
 import { StateUpdater } from 'preact/hooks';
-import { IApiService } from '../../services/IApiService';
-import { LogKind } from '../../tools/logger/LogKind';
-import { Singletons, SingletonKey } from '../../tools/singleton/Singletons';
-import { IStore } from '../../tools/store/IStore';
-import { NotificationContent } from '../model/InfoState';
-import { NearScooter } from '../model/NearScooter';
-import { NearScooterPayload } from '../model/NearScooterPayload';
-import { Point } from '../model/Point';
-import { RequestState } from '../model/RequestState';
-import { ScooterListState } from '../model/ScooterListState';
-import { Hook } from '../utils/Hook';
+import { IApiService } from '../../../services/IApiService';
+import { LogKind } from '../../../tools/logger/LogKind';
+import { Singletons, SingletonKey } from '../../../tools/singleton/Singletons';
+import { IStore } from '../../../tools/store/IStore';
+import { NotificationState } from '../notification/NotificationState';
+import { NearScooter } from '../../model/NearScooter';
+import { NearScooterPayload } from '../../model/NearScooterPayload';
+import { Point } from '../../model/Point';
+import { RequestState } from '../../model/RequestState';
+import { ScooterListState } from './ScooterListState';
+import { Hook } from '../../framework/Hook';
 
 export class ScooterListHook extends Hook<{}, ScooterListState> {
 	private timeout: NodeJS.Timeout;
 	private apiSvc: IApiService;
-	private notificationStore: IStore<NotificationContent>;
+	private notificationStore: IStore<NotificationState>;
 	private pointStore: IStore<Point>;
 	private countStore: IStore<number>;
 	private radiusStore: IStore<number>;
@@ -24,7 +24,7 @@ export class ScooterListHook extends Hook<{}, ScooterListState> {
 	public constructor(d: [ScooterListState, StateUpdater<ScooterListState>]) {
 		super(d[0], d[1]);
 		this.apiSvc = Singletons.Load<IApiService>(SingletonKey.api);
-		this.notificationStore = Singletons.Load<IStore<NotificationContent>>(SingletonKey.notification);
+		this.notificationStore = Singletons.Load<IStore<NotificationState>>(SingletonKey.notification);
 		this.pointStore = Singletons.Load<IStore<Point>>(SingletonKey.location);
 		this.countStore = Singletons.Load<IStore<number>>(SingletonKey.scooterCount);
 		this.radiusStore = Singletons.Load<IStore<number>>(SingletonKey.radius);
@@ -103,7 +103,7 @@ export class ScooterListHook extends Hook<{}, ScooterListState> {
 					this.update((s) => {
 						s.RequestState = RequestState.ERROR;
 					});
-					this.notificationStore.set(new NotificationContent(LogKind.error, `${e.name} - ${e.description}`));
+					this.notificationStore.set(new NotificationState(LogKind.error, `${e.name} - ${e.description}`));
 				}
 			);
 		}

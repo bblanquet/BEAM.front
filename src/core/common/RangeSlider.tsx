@@ -1,4 +1,5 @@
 import { Component, h } from 'preact';
+import './RangeSlider.css';
 
 export default class RangeSlider extends Component<
 	{ onValue: (e: number) => void; min: number; max: number; value: number },

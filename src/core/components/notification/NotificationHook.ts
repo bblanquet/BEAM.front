@@ -1,22 +1,22 @@
-import { NotificationContent } from '../model/InfoState';
-import { LogKind } from '../../tools/logger/LogKind';
-import { StaticLogger } from '../../tools/logger/StaticLogger';
 import { StateUpdater } from 'preact/hooks';
-import { Hook } from '../utils/Hook';
-import { SingletonKey, Singletons } from '../../tools/singleton/Singletons';
-import { IStore } from '../../tools/store/IStore';
+import { LogKind } from '../../../tools/logger/LogKind';
+import { StaticLogger } from '../../../tools/logger/StaticLogger';
+import { Singletons, SingletonKey } from '../../../tools/singleton/Singletons';
+import { IStore } from '../../../tools/store/IStore';
+import { NotificationState } from './NotificationState';
+import { Hook } from '../../framework/Hook';
 
-export class NotificationHook extends Hook<{}, NotificationContent> {
-	private notificationSvc: IStore<NotificationContent>;
+export class NotificationHook extends Hook<{}, NotificationState> {
+	private notificationSvc: IStore<NotificationState>;
 	private _timeout: NodeJS.Timeout;
 
-	constructor(d: [NotificationContent, StateUpdater<NotificationContent>], private animate: () => void) {
+	constructor(d: [NotificationState, StateUpdater<NotificationState>], private animate: () => void) {
 		super(d[0], d[1]);
-		this.notificationSvc = Singletons.Load<IStore<NotificationContent>>(SingletonKey.notification);
+		this.notificationSvc = Singletons.Load<IStore<NotificationState>>(SingletonKey.notification);
 		this.notificationSvc.onChange.on(this.handleNotification.bind(this));
 	}
 
-	private handleNotification(src: any, notification: NotificationContent): void {
+	private handleNotification(src: any, notification: NotificationState): void {
 		this.update((e) => {
 			e.kind = notification.kind;
 			e.message = notification.message;

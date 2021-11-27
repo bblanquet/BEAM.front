@@ -1,8 +1,8 @@
 import { Component, h } from 'preact';
-import { SingletonKey, Singletons } from '../../tools/singleton/Singletons';
-import { IStore } from '../../tools/store/IStore';
-import { PanelState } from '../model/PanelState';
-import RangeSlider from './RangeSlider';
+import { SingletonKey, Singletons } from '../../../tools/singleton/Singletons';
+import { IStore } from '../../../tools/store/IStore';
+import { PanelState } from './PanelState';
+import RangeSlider from '../../common/RangeSlider';
 
 export class Panel extends Component<{}, PanelState> {
 	private radiusStore: IStore<number>;

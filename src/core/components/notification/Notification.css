@@ -1,0 +1,41 @@
+.slow-bounce {
+	animation: slow-bounce 0.5s linear;
+}
+
+@keyframes slow-bounce {
+	0% {
+		transform: scale(0.6);
+	}
+	60% {
+		transform: scale(1.2);
+	}
+	80% {
+		transform: scale(0.8);
+	}
+	100% {
+		transform: scale(1);
+	}
+}
+
+.toast-container {
+	position: absolute;
+	width: 100%;
+	justify-content: center;
+	bottom: 0px;
+	margin-bottom: 10px;
+	display: flex;
+	align-items: flex-end;
+	z-index: 1000;
+}
+
+.my-toast {
+	position: absolute;
+	width: 60%;
+	color: white;
+	text-align: center;
+	padding: 5px;
+	font-weight: bold;
+	border-radius: 10px;
+	height: fit-content;
+	z-index: 1000;
+}

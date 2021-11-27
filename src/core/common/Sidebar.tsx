@@ -1,6 +1,7 @@
 import { Component, h } from 'preact';
 import Icon from './Icon';
 import Switch from './Switch';
+import './Sidebar.css';
 
 export default class Sidebar extends Component<{}, { isSidebarVisible: boolean }> {
 	private sidebar: HTMLElement;

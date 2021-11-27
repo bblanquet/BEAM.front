@@ -1,6 +1,6 @@
-import { NearScooter } from './NearScooter';
-import { Point } from './Point';
-import { RequestState } from './RequestState';
+import { NearScooter } from '../../model/NearScooter';
+import { Point } from '../../model/Point';
+import { RequestState } from '../../model/RequestState';
 
 export class ScooterListState {
 	RequestState: RequestState = RequestState.LOADED;

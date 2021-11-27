@@ -1,11 +1,11 @@
 import { Component, h } from 'preact';
-import { HookableComponent } from '../utils/HookableComponent';
-import { toReadableNumber } from '../../tools/numberUtils';
-import Icon from '../common/Icon';
-import { ScooterListHook } from '../hook/ScooterListHook';
-import { ScooterListState } from '../model/ScooterListState';
 import { useState } from 'preact/hooks';
-import Loading from './Loading';
+import { toReadableNumber } from '../../../tools/numberUtils';
+import Icon from '../../common/Icon';
+import Loading from '../../common/Loading';
+import { ScooterListState } from './ScooterListState';
+import { HookableComponent } from '../../framework/HookableComponent';
+import { ScooterListHook } from './ScooterListHook';
 
 export default class ScooterList extends HookableComponent<{}, ScooterListHook, ScooterListState> {
 	public getDefaultHook(): ScooterListHook {

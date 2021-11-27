@@ -1,5 +1,5 @@
 import { h, render } from 'preact';
-import HomeScreen from './components/screen/Homescreen';
+import HomeScreen from './core/screen/Homescreen';
 import 'bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '@fortawesome/fontawesome-free/js/fontawesome';
@@ -7,8 +7,6 @@ import '@fortawesome/fontawesome-free/js/solid';
 import '@fortawesome/fontawesome-free/js/regular';
 import '@fortawesome/fontawesome-free/js/brands';
 import './styles/common.css';
-import './styles/animation.css';
-import './styles/slider.css';
 import Router from 'preact-router';
 import { SingletonContainer } from './tools/singleton/SingletonContainer';
 

@@ -1,0 +1,27 @@
+.sidebar {
+	position: fixed;
+	top: 0px;
+	left: 0px;
+
+	height: 100%;
+	width: 0px;
+	overflow: hidden;
+
+	background-color: #625eaa;
+	color: aliceblue;
+	transition: 0.5s;
+	z-index: 1000;
+}
+
+.btn-sidebar {
+	position: fixed;
+	top: 0px;
+	left: 0px;
+
+	height: fit-content;
+	width: fit-content;
+	margin: 5px;
+
+	transition: 0.5s;
+	z-index: 1000;
+}

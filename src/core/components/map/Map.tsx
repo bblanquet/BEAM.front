@@ -1,8 +1,8 @@
 import { h } from 'preact';
-import { HookableComponent } from '../utils/HookableComponent';
+import { HookableComponent } from '../../framework/HookableComponent';
 import { useState } from 'preact/hooks';
-import { MapHook } from '../hook/MapHook';
-import { MapState } from '../model/MapState';
+import { MapHook } from './MapHook';
+import { MapState } from './MapState';
 
 export default class Map extends HookableComponent<{}, MapHook, MapState> {
 	getDefaultHook() {
