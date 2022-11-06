@@ -3,7 +3,7 @@
 	"keys": [
 		{
 			"search": "{{server}}",
-			"replace": "https://localhost:49153",
+			"replace": "http://localhost:8090",
 			"flags": "g"
 		}
 	]
